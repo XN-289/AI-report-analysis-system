@@ -418,7 +418,7 @@
             border-color: var(--primary);
         }
 
-        .rating-chip {
+        .type-chip {
             padding: 5px 12px;
             font-size: 0.8rem;
             border-radius: 6px;
@@ -429,17 +429,37 @@
             font-weight: 500;
         }
 
-        .rating-chip[data-rating="buy"] { --rc: var(--rating-buy); }
-        .rating-chip[data-rating="outperform"] { --rc: var(--rating-outperform); }
-        .rating-chip[data-rating="neutral"] { --rc: var(--rating-neutral); }
-        .rating-chip[data-rating="underperform"] { --rc: var(--rating-underperform); }
-        .rating-chip[data-rating="sell"] { --rc: var(--rating-sell); }
+        .type-chip[data-type="行业"] { --rc: #2563eb; }
+        .type-chip[data-type="策略"] { --rc: #7c3aed; }
+        .type-chip[data-type="宏观"] { --rc: #0891b2; }
+        .type-chip[data-type="晨报"] { --rc: #ea580c; }
+        .type-chip[data-type="点评"] { --rc: #16a34a; }
+        .type-chip[data-type="展望"] { --rc: #ca8a04; }
+        .type-chip[data-type="深度"] { --rc: #dc2626; }
 
-        .rating-chip:hover, .rating-chip.active {
+        .type-chip:hover, .type-chip.active {
             border-color: var(--rc);
             color: var(--rc);
             background: color-mix(in srgb, var(--rc) 8%, var(--bg-card));
         }
+
+        .type-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .type-morning { background: #ea580c15; color: #ea580c; }
+        .type-strategy { background: #7c3aed15; color: #7c3aed; }
+        .type-macro { background: #0891b215; color: #0891b2; }
+        .type-industry { background: #2563eb15; color: #2563eb; }
+        .type-comment { background: #16a34a15; color: #16a34a; }
+        .type-outlook { background: #ca8a0415; color: #ca8a04; }
+        .type-midyear { background: #be185d15; color: #be185d; }
+        .type-deep { background: #dc262615; color: #dc2626; }
+        .type-other { background: #6b728015; color: #6b7280; }
 
         /* ===== Report Cards Grid ===== */
         .results-info {
@@ -858,14 +878,16 @@
                     </select>
                 </div>
             </div>
-            <div class="filter-group" id="ratingFilters">
-                <span class="filter-label">评级</span>
-                <button class="rating-chip active" data-rating="all">全部</button>
-                <button class="rating-chip" data-rating="buy">买入</button>
-                <button class="rating-chip" data-rating="outperform">增持</button>
-                <button class="rating-chip" data-rating="neutral">中性</button>
-                <button class="rating-chip" data-rating="underperform">减持</button>
-                <button class="rating-chip" data-rating="sell">卖出</button>
+            <div class="filter-group" id="typeFilters">
+                <span class="filter-label">类型</span>
+                <button class="type-chip active" data-type="all">全部</button>
+                <button class="type-chip" data-type="行业">行业</button>
+                <button class="type-chip" data-type="策略">策略</button>
+                <button class="type-chip" data-type="宏观">宏观</button>
+                <button class="type-chip" data-type="晨报">晨报</button>
+                <button class="type-chip" data-type="点评">点评</button>
+                <button class="type-chip" data-type="展望">展望</button>
+                <button class="type-chip" data-type="深度">深度</button>
             </div>
         </div>
     </section>
@@ -922,7 +944,7 @@
         search: '',
         time: 'all',
         industry: '',
-        rating: 'all'
+        type: 'all'
     };
 
     // ===== DOM refs =====
@@ -972,6 +994,19 @@
         'neutral': ['中性', '持有', '同步大市'],
         'underperform': ['减持', '回避'],
         'sell': ['卖出', '跑输大市']
+    };
+
+    // Report type classification (extracted from title keywords)
+    const TYPE_CLASS_MAP = {
+        '晨报': 'type-morning',
+        '策略': 'type-strategy',
+        '宏观': 'type-macro',
+        '行业': 'type-industry',
+        '点评': 'type-comment',
+        '展望': 'type-outlook',
+        '中期': 'type-midyear',
+        '深度': 'type-deep',
+        '其他': 'type-other'
     };
 
     // ===== Dark Mode =====
@@ -1062,6 +1097,21 @@
         return r.pdf_url || r.url || r['链接'] || r.pdfUrl || r['PDF链接'] || r.href || '';
     }
 
+    // Extract report type from title (pure Python keyword matching, no AI needed)
+    function getReportType(title) {
+        if (!title) return '';
+        const t = title.toLowerCase();
+        if (t.includes('晨报') || t.includes('早报') || t.includes('日报')) return '晨报';
+        if (t.includes('策略') || t.includes('投资策略')) return '策略';
+        if (t.includes('宏观') || t.includes('gdp') || t.includes('cpi') || t.includes('pmi')) return '宏观';
+        if (t.includes('行业') || t.includes('产业') || t.includes('赛道')) return '行业';
+        if (t.includes('点评') || t.includes('评论') || t.includes('简评')) return '点评';
+        if (t.includes('展望') || t.includes('展望') || t.includes('前瞻')) return '展望';
+        if (t.includes('年中') || t.includes('年终') || t.includes('中期')) return '中期';
+        if (t.includes('深度') || t.includes('专题') || t.includes('系列')) return '深度';
+        return '其他';
+    }
+
     // ===== Data Loading =====
     async function loadReports() {
         try {
@@ -1126,7 +1176,7 @@
 
     // ===== Filtering =====
     function applyFilters() {
-        const { search, time, industry, rating } = currentFilters;
+        const { search, time, industry, type } = currentFilters;
         const searchLower = search.toLowerCase();
 
         filteredReports = allReports.filter(r => {
@@ -1134,7 +1184,7 @@
             const broker = getReportBroker(r);
             const date = getReportDate(r);
             const ind = getReportIndustry(r);
-            const rat = getReportRating(r);
+            const reportType = getReportType(title);
 
             // Search
             if (search && !title.toLowerCase().includes(searchLower) && !broker.toLowerCase().includes(searchLower)) {
@@ -1149,11 +1199,8 @@
             // Industry
             if (industry && ind !== industry) return false;
 
-            // Rating
-            if (rating !== 'all') {
-                const validRatings = RATING_FILTER_MAP[rating] || [];
-                if (!validRatings.includes(rat)) return false;
-            }
+            // Report Type
+            if (type !== 'all' && reportType !== type) return false;
 
             return true;
         });
@@ -1202,25 +1249,25 @@
             const broker = getReportBroker(r);
             const date = getReportDate(r);
             const ind = getReportIndustry(r);
-            const rat = getReportRating(r);
             const url = getReportUrl(r);
+            const reportType = getReportType(title);
 
-            const ratingClass = RATING_CLASS_MAP[rat] || '';
-            const ratingHtml = rat ? '<span class="rating-badge ' + ratingClass + '">' + escapeHtml(rat) + '</span>' : '';
+            const typeClass = TYPE_CLASS_MAP[reportType] || 'type-other';
+            const typeHtml = reportType ? '<span class="type-badge ' + typeClass + '">' + reportType + '</span>' : '';
             const industryHtml = ind ? '<span class="industry-tag">' + escapeHtml(ind) + '</span>' : '';
-            // Link to report detail page with params (encode PDF URL properly)
+            // Link to report detail page with params (URLSearchParams handles encoding)
             const reportParams = new URLSearchParams({
                 title: title, org: broker, date: formatDate(date),
-                industry: ind, rating: rat, pdf: url || ''
+                industry: ind, type: reportType, pdf: url || ''
             }).toString();
             const titleHtml = '<a href="report.html?' + reportParams + '">' + escapeHtml(title) + '</a>';
 
-            const pdfBtn = url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文" onclick="event.stopPropagation()">📄 查看原文</a>' : '';
+            const pdfBtn = url ? '<a href="' + url + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文" onclick="event.stopPropagation()">📄 查看原文</a>' : '';
 
             return '<article class="report-card" style="transition-delay:' + (i * 40) + 'ms">' +
                 '<div class="card-header">' +
                     '<span class="card-date">' + escapeHtml(formatDate(date)) + '</span>' +
-                    ratingHtml +
+                    typeHtml +
                 '</div>' +
                 '<h3 class="card-title">' + titleHtml + '</h3>' +
                 '<div class="card-meta">' +
@@ -1344,12 +1391,12 @@
         applyFilters();
     });
 
-    // Rating filter chips
-    document.querySelectorAll('.rating-chip[data-rating]').forEach(chip => {
+    // Report type filter chips
+    document.querySelectorAll('.type-chip[data-type]').forEach(chip => {
         chip.addEventListener('click', () => {
-            document.querySelectorAll('.rating-chip[data-rating]').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.type-chip[data-type]').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
-            currentFilters.rating = chip.getAttribute('data-rating');
+            currentFilters.type = chip.getAttribute('data-type');
             applyFilters();
         });
     });
