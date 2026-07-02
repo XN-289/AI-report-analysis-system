@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看原文 - 研报智库</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #1a7a6d;
+            --primary-light: #22a08e;
+            --bg: #f0ebe4;
+            --bg-card: #ffffff;
+            --text: #2d2a26;
+            --text-secondary: #6b6560;
+            --border: #ddd6cd;
+            --radius: 12px;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            text-align: center;
+        }
+        .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .report-title {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: left;
+            word-break: break-all;
+        }
+        .report-title strong {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26,122,109,0.3);
+        }
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-secondary:hover {
+            background: rgba(26,122,109,0.1);
+        }
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background: rgba(26,122,109,0.1);
+        }
+        .status {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .status.loading {
+            display: block;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        .status.error {
+            display: block;
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .status.success {
+            display: block;
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📄</div>
+        <h1>查看原文</h1>
+        <p class="subtitle">点击下方按钮查看研报原文</p>
+
+        <div class="report-title">
+            <strong>研报标题</strong>
+            <span id="titleText">加载中...</span>
+        </div>
+
+        <div class="btn-group">
+            <a id="pdfBtn" href="#" target="_blank" class="btn btn-primary">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                直接打开 PDF
+            </a>
+
+            <a id="searchBtn" href="#" target="_blank" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                在 manymore13 搜索
+            </a>
+        </div>
+
+        <div class="divider">或</div>
+
+        <button class="copy-btn" onclick="copyTitle()">
+            📋 复制标题，手动搜索
+        </button>
+
+        <div id="status" class="status"></div>
+
+        <div class="footer">
+            <p>数据来源：<a href="https://github.com/manymore13/report" target="_blank">manymore13/report</a></p>
+            <p>如果 PDF 被拦截，请使用搜索功能</p>
+        </div>
+    </div>
+
+    <script>
+        // Get parameters from URL
+        const params = new URLSearchParams(window.location.search);
+        const title = params.get('title') || '未知研报';
+        const pdf = params.get('pdf') || '';
+
+        // Display title
+        document.getElementById('titleText').textContent = title;
+
+        // Set PDF button
+        const pdfBtn = document.getElementById('pdfBtn');
+        if (pdf) {
+            pdfBtn.href = pdf;
+            // Try to detect if PDF is blocked
+            setTimeout(() => {
+                const status = document.getElementById('status');
+                status.className = 'status loading';
+                status.textContent = '正在尝试打开 PDF...';
+            }, 500);
+        } else {
+            pdfBtn.style.display = 'none';
+        }
+
+        // Set search button
+        const searchBtn = document.getElementById('searchBtn');
+        searchBtn.href = 'https://manymore13.github.io/report/';
+
+        // Auto-fill search on manymore13 site
+        // We can't directly control their site, but we can open with a hint
+        searchBtn.onclick = function(e) {
+            // Open the search page
+            window.open('https://manymore13.github.io/report/', '_blank');
+            // Show instruction
+            const status = document.getElementById('status');
+            status.className = 'status loading';
+            status.innerHTML = '已打开搜索页，请在搜索框中粘贴标题：<br><strong>' + title + '</strong>';
+            e.preventDefault();
+        };
+
+        // Copy title function
+        function copyTitle() {
+            navigator.clipboard.writeText(title).then(() => {
+                const status = document.getElementById('status');
+                status.className = 'status success';
+                status.textContent = '✓ 标题已复制到剪贴板';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 2000);
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = title;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                const status = document.getElementById('status');
+                status.className = 'status success';
+                status.textContent = '✓ 标题已复制到剪贴板';
+            });
+        }
+    </script>
+</body>
+</html>

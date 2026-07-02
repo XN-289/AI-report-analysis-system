@@ -1262,9 +1262,9 @@
             }).toString();
             const titleHtml = '<a href="report.html?' + reportParams + '">' + escapeHtml(title) + '</a>';
 
-            // Use direct PDF link from data when available, fallback to search
-            const pdfLink = url || 'https://manymore13.github.io/report/';
-            const pdfBtn = '<a href="' + pdfLink + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文" onclick="event.stopPropagation()">📄 查看原文</a>';
+            // Link to viewer page with title and PDF URL
+            const viewerUrl = 'viewer.html?title=' + encodeURIComponent(title) + '&pdf=' + encodeURIComponent(url || '');
+            const pdfBtn = '<a href="' + viewerUrl + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文" onclick="event.stopPropagation()">📄 查看原文</a>';
 
             return '<article class="report-card" style="transition-delay:' + (i * 40) + 'ms">' +
                 '<div class="card-header">' +
