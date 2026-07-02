@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研报详情 - 研报智库</title>
+    <meta name="description" content="券商研报详情页，AI智能解析">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS Custom Properties ===== */
+        :root {
+            --primary: #1a7a6d;
+            --primary-light: #22a08e;
+            --primary-dark: #146158;
+            --accent: #e8713a;
+            --accent-light: #f09060;
+            --bg: #f0ebe4;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --text: #2d2a26;
+            --text-secondary: #6b6560;
+            --text-muted: #9e9790;
+            --border: #ddd6cd;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-hover: 0 12px 40px rgba(0,0,0,0.15);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-lg: 16px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-cn: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-en: 'Playfair Display', Georgia, serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --rating-buy: #e04040;
+            --rating-outperform: #e8713a;
+            --rating-neutral: #5b8def;
+            --rating-underperform: #888;
+            --rating-sell: #555;
+            --dark-panel: #1e2a2a;
+            --dark-panel-text: #e0ddd8;
+            --sentiment-bullish: #22a08e;
+            --sentiment-bearish: #e04040;
+            --sentiment-neutral: #5b8def;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1816;
+            --bg-card: #252220;
+            --bg-input: #2d2a27;
+            --text: #e8e2da;
+            --text-secondary: #a8a09a;
+            --text-muted: #6b6560;
+            --border: #3a3632;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+            --shadow-hover: 0 12px 40px rgba(0,0,0,0.5);
+            --dark-panel: #141e1e;
+            --dark-panel-text: #d8d4ce;
+        }
+
+        /* ===== Reset & Base ===== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-cn);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+
+        a:hover {
+            color: var(--primary-light);
+        }
+
+        /* ===== Sticky Top Navigation ===== */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            height: 56px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+        }
+
+        .nav-back:hover {
+            color: var(--primary);
+            background: rgba(26,122,109,0.06);
+        }
+
+        .nav-back svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .nav-brand {
+            font-family: var(--font-en);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--primary);
+            letter-spacing: -0.01em;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(26,122,109,0.08);
+            color: var(--primary);
+        }
+
+        /* ===== Page Container ===== */
+        .page-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* ===== Loading State ===== */
+        .page-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1rem;
+            gap: 1.25rem;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* ===== Report Header ===== */
+        .report-header {
+            position: relative;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-top-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .header-title-area {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .report-title {
+            font-family: var(--font-cn);
+            font-size: clamp(1.5rem, 3.5vw, 2rem);
+            font-weight: 700;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+
+        .header-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: all var(--transition);
+        }
+
+        .badge-org {
+            background: rgba(26,122,109,0.1);
+            color: var(--primary);
+            border: 1px solid rgba(26,122,109,0.2);
+        }
+
+        .badge-date {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+        }
+
+        .badge-industry {
+            background: rgba(232,113,58,0.08);
+            color: var(--accent);
+            border: 1px solid rgba(232,113,58,0.2);
+        }
+
+        .badge-rating {
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-rating.buy {
+            background: rgba(224,64,64,0.1);
+            color: var(--rating-buy);
+            border: 1px solid rgba(224,64,64,0.2);
+        }
+        .badge-rating.outperform {
+            background: rgba(232,113,58,0.1);
+            color: var(--rating-outperform);
+            border: 1px solid rgba(232,113,58,0.2);
+        }
+        .badge-rating.neutral {
+            background: rgba(91,141,239,0.1);
+            color: var(--rating-neutral);
+            border: 1px solid rgba(91,141,239,0.2);
+        }
+        .badge-rating.underperform {
+            background: rgba(136,136,136,0.1);
+            color: var(--rating-underperform);
+            border: 1px solid rgba(136,136,136,0.2);
+        }
+        .badge-rating.sell {
+            background: rgba(85,85,85,0.1);
+            color: var(--rating-sell);
+            border: 1px solid rgba(85,85,85,0.2);
+        }
+
+        /* ===== Prominent "查看原文" Button ===== */
+        .btn-view-pdf {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius);
+            font-family: var(--font-cn);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow:
+                0 4px 14px rgba(26,122,109,0.35),
+                0 0 0 0 rgba(26,122,109,0);
+            text-decoration: none;
+            white-space: nowrap;
+            animation: pulse-shadow 2.5s ease-in-out infinite;
+        }
+
+        .btn-view-pdf svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            flex-shrink: 0;
+        }
+
+        .btn-view-pdf:hover {
+            background: var(--primary-light);
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow:
+                0 8px 28px rgba(26,122,109,0.45),
+                0 0 0 0 rgba(26,122,109,0);
+            animation: none;
+        }
+
+        .btn-view-pdf:active {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(26,122,109,0.3);
+        }
+
+        @keyframes pulse-shadow {
+            0%, 100% {
+                box-shadow:
+                    0 4px 14px rgba(26,122,109,0.35),
+                    0 0 0 0px rgba(26,122,109,0.25);
+            }
+            50% {
+                box-shadow:
+                    0 4px 14px rgba(26,122,109,0.35),
+                    0 0 0 8px rgba(26,122,109,0);
+            }
+        }
+
+        .header-divider {
+            height: 1px;
+            background: var(--border);
+            margin-top: 0.5rem;
+        }
+
+        /* ===== 核心观点 Section (Dark Panel) ===== */
+        .section-panel {
+            background: var(--dark-panel);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp 0.5s 0.1s ease forwards;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--dark-panel-text);
+            margin-bottom: 1.25rem;
+        }
+
+        .section-title .icon {
+            font-size: 1.2rem;
+        }
+
+        .key-points {
+            list-style: none;
+        }
+
+        .key-points li {
+            position: relative;
+            padding: 0.6rem 0 0.6rem 1.5rem;
+            color: var(--dark-panel-text);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            opacity: 0.92;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .key-points li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .key-points li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 1.05rem;
+            width: 6px;
+            height: 6px;
+            background: var(--primary-light);
+            border-radius: 50%;
+        }
+
+        .ai-pending {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .ai-pending .dot-pulse {
+            display: flex;
+            gap: 6px;
+        }
+
+        .ai-pending .dot-pulse span {
+            width: 8px;
+            height: 8px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            animation: dotBounce 1.4s ease-in-out infinite;
+        }
+
+        .ai-pending .dot-pulse span:nth-child(2) { animation-delay: 0.16s; }
+        .ai-pending .dot-pulse span:nth-child(3) { animation-delay: 0.32s; }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .ai-pending p {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+        }
+
+        .ai-pending p.sub-note {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+
+        /* ===== 研报信息卡片 (4-column grid) ===== */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp 0.5s 0.15s ease forwards;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            text-align: center;
+            transition: all var(--transition);
+        }
+
+        .info-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .info-card-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            word-break: break-word;
+        }
+
+        .info-card-value.rating-value {
+            font-weight: 700;
+        }
+
+        .info-card-value.rating-value.buy { color: var(--rating-buy); }
+        .info-card-value.rating-value.outperform { color: var(--rating-outperform); }
+        .info-card-value.rating-value.neutral { color: var(--rating-neutral); }
+        .info-card-value.rating-value.underperform { color: var(--rating-underperform); }
+        .info-card-value.rating-value.sell { color: var(--rating-sell); }
+
+        /* ===== AI 智能分析 Section ===== */
+        .ai-analysis {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp 0.5s 0.2s ease forwards;
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ai-header .icon {
+            font-size: 1.3rem;
+        }
+
+        .ai-header h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .ai-header .ai-powered-badge {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            background: rgba(26,122,109,0.06);
+            border-radius: 50px;
+            font-size: 0.72rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .ai-powered-badge svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .analysis-block {
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            transition: background var(--transition);
+        }
+
+        .analysis-block.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .analysis-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .analysis-value {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.65;
+        }
+
+        .analysis-value.summary {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--primary-dark);
+        }
+
+        [data-theme="dark"] .analysis-value.summary {
+            color: var(--primary-light);
+        }
+
+        /* Sentiment */
+        .sentiment-display {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .sentiment-display.bullish {
+            background: rgba(34,160,142,0.1);
+            color: var(--sentiment-bullish);
+        }
+
+        .sentiment-display.bearish {
+            background: rgba(224,64,64,0.1);
+            color: var(--sentiment-bearish);
+        }
+
+        .sentiment-display.neutral {
+            background: rgba(91,141,239,0.1);
+            color: var(--sentiment-neutral);
+        }
+
+        /* Confidence bar */
+        .confidence-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .confidence-bar {
+            flex: 1;
+            height: 10px;
+            background: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .confidence-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0;
+        }
+
+        .confidence-pct {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        /* Risk list */
+        .risk-list {
+            list-style: none;
+        }
+
+        .risk-list li {
+            position: relative;
+            padding: 0.35rem 0 0.35rem 1.25rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .risk-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.7rem;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        /* Stock pills */
+        .stock-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .stock-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 14px;
+            background: rgba(26,122,109,0.08);
+            color: var(--primary);
+            border: 1px solid rgba(26,122,109,0.15);
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            transition: all var(--transition);
+        }
+
+        .stock-pill:hover {
+            background: rgba(26,122,109,0.15);
+            border-color: var(--primary);
+        }
+
+        /* ===== 底部高亮栏 ===== */
+        .highlight-bar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: fadeUp 0.5s 0.25s ease forwards;
+        }
+
+        .highlight-bar p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.05rem;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+            line-height: 1.6;
+        }
+
+        .btn-highlight-pdf {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            background: #ffffff;
+            color: var(--primary);
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-cn);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            text-decoration: none;
+        }
+
+        .btn-highlight-pdf svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .btn-highlight-pdf:hover {
+            background: #f8f6f3;
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-brand {
+            font-family: var(--font-en);
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer p {
+            margin: 0.25rem 0;
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+        }
+
+        .footer a:hover {
+            color: var(--primary);
+        }
+
+        .footer .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 0.75rem;
+            padding: 4px 12px;
+            background: rgba(26,122,109,0.06);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        .ai-badge svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* ===== Not Found State ===== */
+        .not-found {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+
+        .not-found svg {
+            width: 72px;
+            height: 72px;
+            stroke: var(--text-muted);
+            stroke-width: 1;
+            fill: none;
+            opacity: 0.35;
+            margin-bottom: 1.25rem;
+        }
+
+        .not-found h2 {
+            font-size: 1.3rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .not-found p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .not-found .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 24px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-cn);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+        }
+
+        .not-found .btn-back:hover {
+            background: var(--primary-light);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .page-container {
+                padding: 1.5rem 1rem 3rem;
+            }
+
+            .header-top-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn-view-pdf {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 24px;
+                font-size: 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-panel {
+                padding: 1.5rem;
+            }
+
+            .ai-analysis {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .top-nav {
+                padding: 0 1rem;
+            }
+
+            .nav-brand {
+                font-size: 1rem;
+            }
+
+            .report-title {
+                font-size: 1.3rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+
+            .info-card {
+                padding: 1rem;
+            }
+
+            .highlight-bar {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== Sticky Top Navigation ===== -->
+<nav class="top-nav">
+    <div class="nav-left">
+        <a href="index.html" class="nav-back">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            返回列表
+        </a>
+    </div>
+    <div class="nav-brand">研报智库</div>
+    <div class="nav-right">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+        </button>
+    </div>
+</nav>
+
+<!-- ===== Page Content ===== -->
+<div class="page-container" id="pageContainer">
+
+    <!-- Loading State -->
+    <div class="page-loading" id="pageLoading">
+        <div class="spinner"></div>
+        <span class="loading-text">正在加载研报详情...</span>
+    </div>
+
+    <!-- Content renders here -->
+    <div id="contentArea" style="display:none;"></div>
+
+</div>
+
+<!-- ===== Footer ===== -->
+<footer class="footer" id="pageFooter" style="display:none;">
+    <div class="footer-brand">研报智库</div>
+    <p>数据来源：东方财富 &middot; 研报智库 &copy; 2026</p>
+    <p>GitHub: <a href="https://github.com/manymore13/report" target="_blank" rel="noopener">manymore13/report</a></p>
+    <div class="ai-badge">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Powered by AI
+    </div>
+</footer>
+
+<script>
+(function() {
+    'use strict';
+
+    // ===== Config =====
+    const DATA_URL = 'https://raw.githubusercontent.com/manymore13/report/main/eastmoney/month.json';
+
+    // ===== Rating Class Map =====
+    const RATING_CLASS_MAP = {
+        '买入': 'buy', '强烈推荐': 'buy', '推荐': 'buy',
+        '增持': 'outperform', '谨慎增持': 'outperform', '优于大市': 'outperform',
+        '中性': 'neutral', '持有': 'neutral', '同步大市': 'neutral',
+        '减持': 'underperform', '回避': 'underperform',
+        '卖出': 'sell', '跑输大市': 'sell'
+    };
+
+    // ===== Sentiment Map =====
+    const SENTIMENT_LABEL = {
+        'bullish': '看多',
+        'bearish': '看空',
+        'neutral': '中性'
+    };
+
+    // ===== DOM refs =====
+    const $ = id => document.getElementById(id);
+    const themeToggle = $('themeToggle');
+    const themeIcon = $('themeIcon');
+    const pageLoading = $('pageLoading');
+    const contentArea = $('contentArea');
+    const pageFooter = $('pageFooter');
+
+    // ===== Dark Mode =====
+    function getTheme() {
+        return localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        themeIcon.innerHTML = theme === 'dark'
+            ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+            : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    setTheme(getTheme());
+
+    // ===== URL Params =====
+    function getUrlParams() {
+        const params = {};
+        const searchParams = new URLSearchParams(window.location.search);
+        for (const [key, value] of searchParams) {
+            params[key] = decodeURIComponent(value);
+        }
+        return params;
+    }
+
+    // ===== Helpers =====
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '未知';
+        const cleaned = String(dateStr).replace(/[\/\.]/g, '-');
+        let d;
+        if (/^\d{8}$/.test(cleaned)) {
+            d = new Date(cleaned.slice(0,4) + '-' + cleaned.slice(4,6) + '-' + cleaned.slice(6,8));
+        } else {
+            d = new Date(cleaned);
+        }
+        if (isNaN(d)) return dateStr;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    function getReportTitle(r) {
+        return r.title || r['报告名称'] || r['标题'] || r.name || '';
+    }
+
+    function getReportBroker(r) {
+        return r.broker || r['券商'] || r['研究机构'] || r.orgName || r.org || '';
+    }
+
+    function getReportDate(r) {
+        return r.date || r['日期'] || r.publishDate || r['发布日期'] || r.reportDate || '';
+    }
+
+    function getReportIndustry(r) {
+        return r.industry || r['行业'] || r.industryName || r['行业名称'] || '';
+    }
+
+    function getReportRating(r) {
+        return r.rating || r['评级'] || r.ratingName || r['投资评级'] || '';
+    }
+
+    function getReportUrl(r) {
+        return r.url || r['链接'] || r.pdfUrl || r['PDF链接'] || r.href || '';
+    }
+
+    // Try to extract AI analysis fields from report data
+    function getAIAnalysis(r) {
+        const analysis = {};
+
+        // one_liner / summary
+        analysis.one_liner = r.one_liner || r.summary || r['一句话摘要'] || r.ai_summary || '';
+
+        // sentiment
+        analysis.sentiment = r.sentiment || r['情感倾向'] || r.ai_sentiment || '';
+
+        // confidence
+        const conf = r.confidence || r['置信度'] || r.ai_confidence;
+        analysis.confidence = conf != null ? (typeof conf === 'string' ? parseFloat(conf) : conf) : null;
+
+        // risks
+        let risks = r.risks || r['风险提示'] || r.ai_risks || [];
+        if (typeof risks === 'string') {
+            risks = risks.split(/[,;；，、]/).map(s => s.trim()).filter(Boolean);
+        }
+        analysis.risks = Array.isArray(risks) ? risks : [];
+
+        // trend
+        analysis.trend = r.trend || r['行业趋势'] || r.ai_trend || '';
+
+        // stocks
+        let stocks = r.stocks || r['相关个股'] || r.ai_stocks || [];
+        if (typeof stocks === 'string') {
+            stocks = stocks.split(/[,;；，、]/).map(s => s.trim()).filter(Boolean);
+        }
+        analysis.stocks = Array.isArray(stocks) ? stocks : [];
+
+        // key_points
+        let keyPoints = r.key_points || r['核心观点'] || r.ai_key_points || r.points || [];
+        if (typeof keyPoints === 'string') {
+            keyPoints = keyPoints.split(/[\n;]/).map(s => s.trim()).filter(Boolean);
+        }
+        analysis.key_points = Array.isArray(keyPoints) ? keyPoints : [];
+
+        const hasAnalysis = analysis.one_liner || analysis.sentiment || analysis.confidence != null ||
+            analysis.risks.length > 0 || analysis.trend || analysis.stocks.length > 0 || analysis.key_points.length > 0;
+
+        return { hasAnalysis, ...analysis };
+    }
+
+    // ===== Render Functions =====
+    function renderBadges(params, matchedReport) {
+        const org = params.org || (matchedReport ? getReportBroker(matchedReport) : '');
+        const date = params.date || (matchedReport ? getReportDate(matchedReport) : '');
+        const industry = params.industry || (matchedReport ? getReportIndustry(matchedReport) : '');
+        const rating = params.rating || (matchedReport ? getReportRating(matchedReport) : '');
+
+        let html = '';
+        if (org) {
+            html += '<span class="badge badge-org">' + escapeHtml(org) + '</span>';
+        }
+        if (date) {
+            html += '<span class="badge badge-date">' + escapeHtml(formatDate(date)) + '</span>';
+        }
+        if (industry) {
+            html += '<span class="badge badge-industry">' + escapeHtml(industry) + '</span>';
+        }
+        if (rating) {
+            const rc = RATING_CLASS_MAP[rating] || '';
+            html += '<span class="badge badge-rating ' + rc + '">' + escapeHtml(rating) + '</span>';
+        }
+        return html;
+    }
+
+    function renderKeyPoints(analysis) {
+        if (analysis.key_points.length > 0) {
+            const items = analysis.key_points.map(p => '<li>' + escapeHtml(p) + '</li>').join('');
+            return '<ul class="key-points">' + items + '</ul>';
+        }
+        return '<div class="ai-pending">' +
+            '<div class="dot-pulse"><span></span><span></span><span></span></div>' +
+            '<p>AI 分析生成中...</p>' +
+            '<p class="sub-note">核心观点将在完成分析后自动展示</p>' +
+        '</div>';
+    }
+
+    function renderAnalysis(analysis) {
+        if (!analysis.hasAnalysis) return '';
+
+        let blocksHtml = '';
+
+        // one_liner
+        if (analysis.one_liner) {
+            blocksHtml += '<div class="analysis-block full-width">' +
+                '<div class="analysis-label">一句话摘要</div>' +
+                '<div class="analysis-value summary">' + escapeHtml(analysis.one_liner) + '</div>' +
+            '</div>';
+        }
+
+        // sentiment
+        if (analysis.sentiment) {
+            const sClass = analysis.sentiment.toLowerCase();
+            const sLabel = SENTIMENT_LABEL[sClass] || analysis.sentiment;
+            const icon = sClass === 'bullish' ? '&#x1F4C8;' : (sClass === 'bearish' ? '&#x1F4C9;' : '&#x27A1;');
+            blocksHtml += '<div class="analysis-block">' +
+                '<div class="analysis-label">情感倾向</div>' +
+                '<div class="sentiment-display ' + sClass + '">' + icon + ' ' + escapeHtml(sLabel) + '</div>' +
+            '</div>';
+        }
+
+        // confidence
+        if (analysis.confidence != null && !isNaN(analysis.confidence)) {
+            const pct = Math.round(analysis.confidence * 100);
+            blocksHtml += '<div class="analysis-block">' +
+                '<div class="analysis-label">置信度</div>' +
+                '<div class="confidence-bar-wrap">' +
+                    '<div class="confidence-bar"><div class="confidence-bar-fill" data-width="' + pct + '%"></div></div>' +
+                    '<span class="confidence-pct">' + pct + '%</span>' +
+                '</div>' +
+            '</div>';
+        }
+
+        // trend
+        if (analysis.trend) {
+            blocksHtml += '<div class="analysis-block">' +
+                '<div class="analysis-label">行业趋势</div>' +
+                '<div class="analysis-value">' + escapeHtml(analysis.trend) + '</div>' +
+            '</div>';
+        }
+
+        // risks
+        if (analysis.risks.length > 0) {
+            const riskItems = analysis.risks.map(r => '<li>' + escapeHtml(r) + '</li>').join('');
+            blocksHtml += '<div class="analysis-block">' +
+                '<div class="analysis-label">风险提示</div>' +
+                '<ul class="risk-list">' + riskItems + '</ul>' +
+            '</div>';
+        }
+
+        // stocks
+        if (analysis.stocks.length > 0) {
+            const pills = analysis.stocks.map(s => '<span class="stock-pill">' + escapeHtml(s) + '</span>').join('');
+            blocksHtml += '<div class="analysis-block full-width">' +
+                '<div class="analysis-label">相关个股</div>' +
+                '<div class="stock-pills">' + pills + '</div>' +
+            '</div>';
+        }
+
+        return '<section class="ai-analysis">' +
+            '<div class="ai-header">' +
+                '<span class="icon">&#x1F9E0;</span>' +
+                '<h2>AI 智能分析</h2>' +
+                '<span class="ai-powered-badge">' +
+                    '<svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' +
+                    'AI Generated' +
+                '</span>' +
+            '</div>' +
+            '<div class="analysis-grid">' + blocksHtml + '</div>' +
+        '</section>';
+    }
+
+    function renderPage(params, matchedReport) {
+        const title = params.title || (matchedReport ? getReportTitle(matchedReport) : '未知研报');
+        const pdf = params.pdf || (matchedReport ? getReportUrl(matchedReport) : '');
+        const analysis = matchedReport ? getAIAnalysis(matchedReport) : { hasAnalysis: false, key_points: [] };
+        const oneLiner = analysis.one_liner || '';
+
+        let html = '';
+
+        // ---- Header ----
+        html += '<header class="report-header">';
+        html += '<div class="header-top-row">';
+        html += '<div class="header-title-area">';
+        html += '<h1 class="report-title">' + escapeHtml(title) + '</h1>';
+        html += '<div class="header-badges">' + renderBadges(params, matchedReport) + '</div>';
+        html += '</div>';
+
+        // Prominent 查看原文 button
+        if (pdf) {
+            html += '<a href="' + escapeHtml(pdf) + '" target="_blank" rel="noopener" class="btn-view-pdf">' +
+                '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
+                '查看原文' +
+            '</a>';
+        }
+
+        html += '</div>'; // header-top-row
+        html += '<div class="header-divider"></div>';
+        html += '</header>';
+
+        // ---- 核心观点 (dark panel) ----
+        html += '<section class="section-panel">';
+        html += '<div class="section-title"><span class="icon">&#x1F4CB;</span> 核心观点</div>';
+        html += renderKeyPoints(analysis);
+        html += '</section>';
+
+        // ---- 研报信息卡片 (4-column grid) ----
+        const org = params.org || (matchedReport ? getReportBroker(matchedReport) : '');
+        const date = params.date || (matchedReport ? getReportDate(matchedReport) : '');
+        const industry = params.industry || (matchedReport ? getReportIndustry(matchedReport) : '');
+        const rating = params.rating || (matchedReport ? getReportRating(matchedReport) : '');
+        const ratingClass = RATING_CLASS_MAP[rating] || '';
+
+        html += '<div class="info-grid">';
+        html += '<div class="info-card"><div class="info-card-label">发行机构</div><div class="info-card-value">' + (org ? escapeHtml(org) : '-') + '</div></div>';
+        html += '<div class="info-card"><div class="info-card-label">发布日期</div><div class="info-card-value">' + (date ? escapeHtml(formatDate(date)) : '-') + '</div></div>';
+        html += '<div class="info-card"><div class="info-card-label">行业分类</div><div class="info-card-value">' + (industry ? escapeHtml(industry) : '-') + '</div></div>';
+        html += '<div class="info-card"><div class="info-card-label">投资评级</div><div class="info-card-value rating-value ' + ratingClass + '">' + (rating ? escapeHtml(rating) : '-') + '</div></div>';
+        html += '</div>';
+
+        // ---- AI 智能分析 ----
+        html += renderAnalysis(analysis);
+
+        // ---- 底部高亮栏 ----
+        html += '<div class="highlight-bar">';
+        if (oneLiner) {
+            html += '<p>' + escapeHtml(oneLiner) + '</p>';
+        } else {
+            html += '<p>点击下方按钮查看完整研报原文</p>';
+        }
+        if (pdf) {
+            html += '<a href="' + escapeHtml(pdf) + '" target="_blank" rel="noopener" class="btn-highlight-pdf">' +
+                '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+                '查看原文' +
+            '</a>';
+        }
+        html += '</div>';
+
+        return html;
+    }
+
+    function renderNotFound() {
+        return '<div class="not-found">' +
+            '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
+            '<h2>未找到研报信息</h2>' +
+            '<p>缺少必要的参数，请从列表页重新进入。</p>' +
+            '<a href="index.html" class="btn-back">返回列表</a>' +
+        '</div>';
+    }
+
+    // ===== Main Init =====
+    async function init() {
+        const params = getUrlParams();
+        const hasParams = params.title || params.org || params.pdf;
+
+        if (!hasParams) {
+            // No params at all - show not found
+            pageLoading.style.display = 'none';
+            contentArea.style.display = 'block';
+            contentArea.innerHTML = renderNotFound();
+            pageFooter.style.display = 'block';
+            document.title = '研报详情 - 研报智库';
+            return;
+        }
+
+        document.title = (params.title || '研报详情') + ' - 研报智库';
+
+        let matchedReport = null;
+
+        // Try to fetch month.json and match by title
+        try {
+            const resp = await fetch(DATA_URL);
+            if (resp.ok) {
+                let data = await resp.json();
+                let allReports = [];
+
+                if (Array.isArray(data)) {
+                    allReports = data;
+                } else if (data && typeof data === 'object') {
+                    allReports = data.data || data.reports || data.list || data.items || [];
+                    if (!Array.isArray(allReports)) {
+                        const values = Object.values(data);
+                        for (const v of values) {
+                            if (Array.isArray(v)) {
+                                allReports = allReports.concat(v);
+                            }
+                        }
+                    }
+                }
+
+                if (!Array.isArray(allReports)) allReports = [];
+
+                // Match by title
+                if (params.title && allReports.length > 0) {
+                    const searchTitle = params.title.trim().toLowerCase();
+                    matchedReport = allReports.find(r => {
+                        const t = getReportTitle(r);
+                        return t && t.trim().toLowerCase() === searchTitle;
+                    });
+
+                    // Fuzzy fallback: try includes match
+                    if (!matchedReport) {
+                        matchedReport = allReports.find(r => {
+                            const t = getReportTitle(r).toLowerCase();
+                            return t && (t.includes(searchTitle) || searchTitle.includes(t));
+                        });
+                    }
+                }
+            }
+        } catch (err) {
+            console.warn('Could not fetch month.json:', err.message);
+        }
+
+        // Render
+        pageLoading.style.display = 'none';
+        contentArea.style.display = 'block';
+        contentArea.innerHTML = renderPage(params, matchedReport);
+        pageFooter.style.display = 'block';
+
+        // Animate confidence bar
+        requestAnimationFrame(() => {
+            const fill = document.querySelector('.confidence-bar-fill');
+            if (fill) {
+                const w = fill.getAttribute('data-width');
+                setTimeout(() => { fill.style.width = w; }, 200);
+            }
+        });
+    }
+
+    init();
+
+})();
+</script>
+
+</body>
+</html>

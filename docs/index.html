@@ -579,6 +579,21 @@
             font-weight: 500;
         }
 
+        .card-pdf-btn {
+            margin-left: auto;
+            font-size: 1.1rem;
+            text-decoration: none;
+            opacity: 0.5;
+            transition: all 0.2s;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .card-pdf-btn:hover {
+            opacity: 1;
+            background: rgba(26,122,109,0.1);
+            transform: scale(1.15);
+        }
+
         /* ===== Loading ===== */
         .loading-container {
             display: flex;
@@ -1183,9 +1198,14 @@
             const ratingClass = RATING_CLASS_MAP[rat] || '';
             const ratingHtml = rat ? '<span class="rating-badge ' + ratingClass + '">' + escapeHtml(rat) + '</span>' : '';
             const industryHtml = ind ? '<span class="industry-tag">' + escapeHtml(ind) + '</span>' : '';
-            const titleHtml = url
-                ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(title) + '</a>'
-                : escapeHtml(title);
+            // Link to report detail page with params
+            const reportParams = new URLSearchParams({
+                title: title, org: broker, date: formatDate(date),
+                industry: ind, rating: rat, pdf: url
+            }).toString();
+            const titleHtml = '<a href="report.html?' + reportParams + '">' + escapeHtml(title) + '</a>';
+
+            const pdfBtn = url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文">📄</a>' : '';
 
             return '<article class="report-card" style="transition-delay:' + (i * 40) + 'ms">' +
                 '<div class="card-header">' +
@@ -1196,6 +1216,7 @@
                 '<div class="card-meta">' +
                     (broker ? '<span class="meta-tag"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escapeHtml(broker) + '</span>' : '') +
                     industryHtml +
+                    pdfBtn +
                 '</div>' +
             '</article>';
         }).join('');
