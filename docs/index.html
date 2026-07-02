@@ -553,6 +553,14 @@
             flex-wrap: wrap;
         }
 
+        .card-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+
         .meta-tag {
             display: inline-flex;
             align-items: center;
@@ -581,17 +589,19 @@
 
         .card-pdf-btn {
             margin-left: auto;
-            font-size: 1.1rem;
+            font-size: 0.85rem;
             text-decoration: none;
-            opacity: 0.5;
+            color: var(--primary);
             transition: all 0.2s;
-            padding: 2px 6px;
+            padding: 4px 10px;
             border-radius: 6px;
+            background: rgba(26,122,109,0.08);
+            font-weight: 500;
         }
         .card-pdf-btn:hover {
-            opacity: 1;
-            background: rgba(26,122,109,0.1);
-            transform: scale(1.15);
+            background: var(--primary);
+            color: #fff;
+            transform: translateY(-1px);
         }
 
         /* ===== Loading ===== */
@@ -1033,23 +1043,23 @@
     }
 
     function getReportBroker(r) {
-        return r.broker || r['券商'] || r['研究机构'] || r.orgName || r.org || '';
+        return r.org_name || r.broker || r['券商'] || r['研究机构'] || r.orgName || r.org || '';
     }
 
     function getReportDate(r) {
-        return r.date || r['日期'] || r.publishDate || r['发布日期'] || r.reportDate || '';
+        return r.publish_date || r.date || r['日期'] || r.publishDate || r['发布日期'] || r.reportDate || '';
     }
 
     function getReportIndustry(r) {
-        return r.industry || r['行业'] || r.industryName || r['行业名称'] || '';
+        return r.industry_name || r.industry || r['行业'] || r.industryName || r['行业名称'] || '';
     }
 
     function getReportRating(r) {
-        return r.rating || r['评级'] || r.ratingName || r['投资评级'] || '';
+        return r.rating || r['评级'] || r.ratingName || r['投资评级'] || r.emRatingName || '';
     }
 
     function getReportUrl(r) {
-        return r.url || r['链接'] || r.pdfUrl || r['PDF链接'] || r.href || '';
+        return r.pdf_url || r.url || r['链接'] || r.pdfUrl || r['PDF链接'] || r.href || '';
     }
 
     // ===== Data Loading =====
@@ -1198,14 +1208,14 @@
             const ratingClass = RATING_CLASS_MAP[rat] || '';
             const ratingHtml = rat ? '<span class="rating-badge ' + ratingClass + '">' + escapeHtml(rat) + '</span>' : '';
             const industryHtml = ind ? '<span class="industry-tag">' + escapeHtml(ind) + '</span>' : '';
-            // Link to report detail page with params
+            // Link to report detail page with params (encode PDF URL properly)
             const reportParams = new URLSearchParams({
                 title: title, org: broker, date: formatDate(date),
-                industry: ind, rating: rat, pdf: url
+                industry: ind, rating: rat, pdf: url || ''
             }).toString();
             const titleHtml = '<a href="report.html?' + reportParams + '">' + escapeHtml(title) + '</a>';
 
-            const pdfBtn = url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文">📄</a>' : '';
+            const pdfBtn = url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文" onclick="event.stopPropagation()">📄 查看原文</a>' : '';
 
             return '<article class="report-card" style="transition-delay:' + (i * 40) + 'ms">' +
                 '<div class="card-header">' +
@@ -1216,6 +1226,8 @@
                 '<div class="card-meta">' +
                     (broker ? '<span class="meta-tag"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escapeHtml(broker) + '</span>' : '') +
                     industryHtml +
+                '</div>' +
+                '<div class="card-actions">' +
                     pdfBtn +
                 '</div>' +
             '</article>';

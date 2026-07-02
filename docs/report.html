@@ -1090,23 +1090,23 @@
     }
 
     function getReportBroker(r) {
-        return r.broker || r['券商'] || r['研究机构'] || r.orgName || r.org || '';
+        return r.org_name || r.broker || r['券商'] || r['研究机构'] || r.orgName || r.org || '';
     }
 
     function getReportDate(r) {
-        return r.date || r['日期'] || r.publishDate || r['发布日期'] || r.reportDate || '';
+        return r.publish_date || r.date || r['日期'] || r.publishDate || r['发布日期'] || r.reportDate || '';
     }
 
     function getReportIndustry(r) {
-        return r.industry || r['行业'] || r.industryName || r['行业名称'] || '';
+        return r.industry_name || r.industry || r['行业'] || r.industryName || r['行业名称'] || '';
     }
 
     function getReportRating(r) {
-        return r.rating || r['评级'] || r.ratingName || r['投资评级'] || '';
+        return r.rating || r['评级'] || r.ratingName || r['投资评级'] || r.emRatingName || '';
     }
 
     function getReportUrl(r) {
-        return r.url || r['链接'] || r.pdfUrl || r['PDF链接'] || r.href || '';
+        return r.pdf_url || r.url || r['链接'] || r.pdfUrl || r['PDF链接'] || r.href || '';
     }
 
     // Try to extract AI analysis fields from report data
@@ -1280,13 +1280,12 @@
         html += '<div class="header-badges">' + renderBadges(params, matchedReport) + '</div>';
         html += '</div>';
 
-        // Prominent 查看原文 button
-        if (pdf) {
-            html += '<a href="' + escapeHtml(pdf) + '" target="_blank" rel="noopener" class="btn-view-pdf">' +
-                '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
-                '查看原文' +
-            '</a>';
-        }
+        // Prominent 查看原文 button - always show
+        const pdfUrl = pdf || 'https://data.eastmoney.com/report/zw_stock.jshtml?encodeUrl=' + encodeURIComponent(title);
+        html += '<a href="' + escapeHtml(pdfUrl) + '" target="_blank" rel="noopener" class="btn-view-pdf">' +
+            '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' +
+            '📄 查看原文' +
+        '</a>';
 
         html += '</div>'; // header-top-row
         html += '<div class="header-divider"></div>';
@@ -1322,12 +1321,11 @@
         } else {
             html += '<p>点击下方按钮查看完整研报原文</p>';
         }
-        if (pdf) {
-            html += '<a href="' + escapeHtml(pdf) + '" target="_blank" rel="noopener" class="btn-highlight-pdf">' +
-                '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
-                '查看原文' +
-            '</a>';
-        }
+        const pdfUrl2 = pdf || 'https://data.eastmoney.com/report/zw_stock.jshtml?encodeUrl=' + encodeURIComponent(title);
+        html += '<a href="' + escapeHtml(pdfUrl2) + '" target="_blank" rel="noopener" class="btn-highlight-pdf">' +
+            '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+            '📄 查看原文' +
+        '</a>';
         html += '</div>';
 
         return html;
