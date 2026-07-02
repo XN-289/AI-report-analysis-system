@@ -1262,7 +1262,9 @@
             }).toString();
             const titleHtml = '<a href="report.html?' + reportParams + '">' + escapeHtml(title) + '</a>';
 
-            const pdfBtn = url ? '<a href="' + url + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文" onclick="event.stopPropagation()">📄 查看原文</a>' : '';
+            // Link to East Money search page (avoids anti-hotlinking)
+            const searchUrl = 'https://data.eastmoney.com/report/info.jshtml?title=' + encodeURIComponent(title);
+            const pdfBtn = '<a href="' + searchUrl + '" target="_blank" rel="noopener" class="card-pdf-btn" title="查看原文" onclick="event.stopPropagation()">📄 查看原文</a>';
 
             return '<article class="report-card" style="transition-delay:' + (i * 40) + 'ms">' +
                 '<div class="card-header">' +
