@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>研报智库 - AI智能券商研报解析平台</title>
+    <meta name="description" content="每日精选券商研报，AI智能解析，一目了然">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS Custom Properties ===== */
+        :root {
+            --primary: #1a7a6d;
+            --primary-light: #22a08e;
+            --primary-dark: #146158;
+            --accent: #e8713a;
+            --accent-light: #f09060;
+            --bg: #f0ebe4;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --text: #2d2a26;
+            --text-secondary: #6b6560;
+            --text-muted: #9e9790;
+            --border: #ddd6cd;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-hover: 0 12px 40px rgba(0,0,0,0.15);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-cn: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-en: 'Playfair Display', Georgia, serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --rating-buy: #e04040;
+            --rating-outperform: #e8713a;
+            --rating-neutral: #5b8def;
+            --rating-underperform: #888;
+            --rating-sell: #555;
+        }
+
+        [data-theme="dark"] {
+            --bg: #1a1816;
+            --bg-card: #252220;
+            --bg-input: #2d2a27;
+            --text: #e8e2da;
+            --text-secondary: #a8a09a;
+            --text-muted: #6b6560;
+            --border: #3a3632;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+            --shadow-hover: 0 12px 40px rgba(0,0,0,0.5);
+        }
+
+        /* ===== Reset & Base ===== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-cn);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background var(--transition), color var(--transition);
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+
+        a:hover {
+            color: var(--primary-light);
+        }
+
+        /* ===== Dark Mode Toggle ===== */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: var(--bg-card);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all var(--transition);
+            color: var(--text);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(26,122,109,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(232,113,58,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(26,122,109,0.08) 0%, transparent 50%);
+            animation: heroShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroShift {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .hero-pattern {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            opacity: 0.03;
+            background-image:
+                repeating-linear-gradient(45deg, var(--text) 0, var(--text) 1px, transparent 0, transparent 50%);
+            background-size: 40px 40px;
+            animation: patternSlide 60s linear infinite;
+        }
+
+        @keyframes patternSlide {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-family: var(--font-en);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .hero-title-cn {
+            font-family: var(--font-cn);
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 300;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .hero-slogan {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .hero-cta {
+            margin-top: 2.5rem;
+        }
+
+        .btn-explore {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 36px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-cn);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition);
+            box-shadow: 0 4px 20px rgba(26,122,109,0.3);
+        }
+
+        .btn-explore:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(26,122,109,0.4);
+            color: #fff;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* ===== Stats Bar ===== */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem 1rem;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ===== Main Content ===== */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* ===== Search & Filter ===== */
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 1.25rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--bg-input);
+            color: var(--text);
+            font-family: var(--font-cn);
+            font-size: 1rem;
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(26,122,109,0.1);
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            margin-right: 0.25rem;
+        }
+
+        .chip {
+            padding: 6px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 50px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: var(--font-cn);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .chip.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .select-wrap {
+            position: relative;
+        }
+
+        .select-wrap::after {
+            content: '';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid var(--text-muted);
+            pointer-events: none;
+        }
+
+        .filter-select {
+            appearance: none;
+            padding: 7px 32px 7px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 50px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: var(--font-cn);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            outline: none;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary);
+        }
+
+        .rating-chip {
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            border: 1.5px solid var(--border);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all var(--transition);
+            font-weight: 500;
+        }
+
+        .rating-chip[data-rating="buy"] { --rc: var(--rating-buy); }
+        .rating-chip[data-rating="outperform"] { --rc: var(--rating-outperform); }
+        .rating-chip[data-rating="neutral"] { --rc: var(--rating-neutral); }
+        .rating-chip[data-rating="underperform"] { --rc: var(--rating-underperform); }
+        .rating-chip[data-rating="sell"] { --rc: var(--rating-sell); }
+
+        .rating-chip:hover, .rating-chip.active {
+            border-color: var(--rc);
+            color: var(--rc);
+            background: color-mix(in srgb, var(--rc) 8%, var(--bg-card));
+        }
+
+        /* ===== Report Cards Grid ===== */
+        .results-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .report-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+            border: 1px solid var(--border);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .report-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .report-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            gap: 0.75rem;
+        }
+
+        .card-date {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            letter-spacing: 0.03em;
+        }
+
+        .rating-badge.buy {
+            background: rgba(224,64,64,0.1);
+            color: var(--rating-buy);
+        }
+        .rating-badge.outperform {
+            background: rgba(232,113,58,0.1);
+            color: var(--rating-outperform);
+        }
+        .rating-badge.neutral {
+            background: rgba(91,141,239,0.1);
+            color: var(--rating-neutral);
+        }
+        .rating-badge.underperform {
+            background: rgba(136,136,136,0.1);
+            color: var(--rating-underperform);
+        }
+        .rating-badge.sell {
+            background: rgba(85,85,85,0.1);
+            color: var(--rating-sell);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 500;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .card-title a:hover {
+            color: var(--primary);
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-tag svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            opacity: 0.6;
+        }
+
+        .industry-tag {
+            padding: 2px 10px;
+            background: rgba(26,122,109,0.08);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* ===== Loading ===== */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 1rem;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ===== Empty State ===== */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            stroke: var(--text-muted);
+            stroke-width: 1;
+            fill: none;
+            opacity: 0.4;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        /* ===== Pagination ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .page-btn:hover:not(.active):not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-brand {
+            font-family: var(--font-en);
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer p {
+            margin: 0.25rem 0;
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+        }
+
+        .footer a:hover {
+            color: var(--primary);
+        }
+
+        .footer .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 0.75rem;
+            padding: 4px 12px;
+            background: rgba(26,122,109,0.06);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .stats-bar {
+                gap: 1.5rem;
+            }
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            .filters {
+                gap: 0.5rem;
+            }
+            .hero-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-bar {
+                gap: 1rem;
+                padding: 1.5rem 1rem;
+            }
+            .main-content {
+                padding: 1.5rem 1rem 3rem;
+            }
+            .report-card {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Dark Mode Toggle -->
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+    <svg id="themeIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+</button>
+
+<!-- Hero Section -->
+<section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">研报智库</h1>
+        <p class="hero-title-cn">Research Report Hub</p>
+        <p class="hero-slogan">每日精选券商研报，AI 智能解析，一目了然</p>
+        <p class="hero-subtitle">数据来源：东方财富 &middot; 每日自动更新</p>
+        <div class="hero-cta">
+            <button class="btn-explore" onclick="document.getElementById('main').scrollIntoView({behavior:'smooth'})">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                浏览研报
+            </button>
+        </div>
+    </div>
+    <div class="scroll-indicator">
+        <span>向下滚动</span>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<div class="stats-bar" id="statsBar">
+    <div class="stat-item">
+        <div class="stat-value" id="statTotal">--</div>
+        <div class="stat-label">研报总数</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value" id="statToday">--</div>
+        <div class="stat-label">今日新增</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value" id="statIndustry">--</div>
+        <div class="stat-label">覆盖行业</div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main class="main-content" id="main">
+    <!-- Search & Filters -->
+    <section class="search-section">
+        <div class="search-box">
+            <span class="search-icon">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索研报标题、券商名称...">
+        </div>
+        <div class="filters">
+            <div class="filter-group">
+                <span class="filter-label">时间</span>
+                <button class="chip active" data-time="all">全部</button>
+                <button class="chip" data-time="today">今日</button>
+                <button class="chip" data-time="week">本周</button>
+                <button class="chip" data-time="month">本月</button>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">行业</span>
+                <div class="select-wrap">
+                    <select class="filter-select" id="industryFilter">
+                        <option value="">全部行业</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-group" id="ratingFilters">
+                <span class="filter-label">评级</span>
+                <button class="rating-chip active" data-rating="all">全部</button>
+                <button class="rating-chip" data-rating="buy">买入</button>
+                <button class="rating-chip" data-rating="outperform">增持</button>
+                <button class="rating-chip" data-rating="neutral">中性</button>
+                <button class="rating-chip" data-rating="underperform">减持</button>
+                <button class="rating-chip" data-rating="sell">卖出</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Info -->
+    <div class="results-info">
+        <span id="resultsCount">加载中...</span>
+        <span id="currentRange"></span>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-container" id="loadingState">
+        <div class="spinner"></div>
+        <span class="loading-text">正在加载研报数据...</span>
+    </div>
+
+    <!-- Report Cards Grid -->
+    <div class="card-grid" id="cardGrid"></div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display:none;">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <p>没有找到匹配的研报</p>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination" id="pagination"></nav>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-brand">研报智库</div>
+    <p>&copy; 2026 研报智库 &middot; 数据来源：<a href="https://github.com/manymore13/report" target="_blank" rel="noopener">东方财富</a></p>
+    <p>GitHub: <a href="https://github.com/manymore13/report" target="_blank" rel="noopener">manymore13/report</a></p>
+    <div class="ai-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Powered by AI
+    </div>
+</footer>
+
+<script>
+(function() {
+    'use strict';
+
+    // ===== Config =====
+    const DATA_URL = 'https://raw.githubusercontent.com/manymore13/report/main/eastmoney/month.json';
+    const PER_PAGE = 18;
+
+    // ===== State =====
+    let allReports = [];
+    let filteredReports = [];
+    let currentPage = 1;
+    let currentFilters = {
+        search: '',
+        time: 'all',
+        industry: '',
+        rating: 'all'
+    };
+
+    // ===== DOM refs =====
+    const $ = id => document.getElementById(id);
+    const themeToggle = $('themeToggle');
+    const themeIcon = $('themeIcon');
+    const searchInput = $('searchInput');
+    const industryFilter = $('industryFilter');
+    const cardGrid = $('cardGrid');
+    const pagination = $('pagination');
+    const loadingState = $('loadingState');
+    const emptyState = $('emptyState');
+    const resultsCount = $('resultsCount');
+    const currentRange = $('currentRange');
+    const statTotal = $('statTotal');
+    const statToday = $('statToday');
+    const statIndustry = $('statIndustry');
+
+    // ===== Rating Mapping =====
+    const RATING_MAP = {
+        '买入': 'buy',
+        '强烈推荐': 'buy',
+        '推荐': 'buy',
+        '增持': 'outperform',
+        '谨慎增持': 'outperform',
+        '优于大市': 'outperform',
+        '中性': 'neutral',
+        '持有': 'neutral',
+        '同步大市': 'neutral',
+        '减持': 'underperform',
+        '回避': 'underperform',
+        '卖出': 'sell',
+        '跑输大市': 'sell'
+    };
+
+    const RATING_CLASS_MAP = {
+        '买入': 'buy', '强烈推荐': 'buy', '推荐': 'buy',
+        '增持': 'outperform', '谨慎增持': 'outperform', '优于大市': 'outperform',
+        '中性': 'neutral', '持有': 'neutral', '同步大市': 'neutral',
+        '减持': 'underperform', '回避': 'underperform',
+        '卖出': 'sell', '跑输大市': 'sell'
+    };
+
+    const RATING_FILTER_MAP = {
+        'buy': ['买入', '强烈推荐', '推荐'],
+        'outperform': ['增持', '谨慎增持', '优于大市'],
+        'neutral': ['中性', '持有', '同步大市'],
+        'underperform': ['减持', '回避'],
+        'sell': ['卖出', '跑输大市']
+    };
+
+    // ===== Dark Mode =====
+    function getTheme() {
+        return localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        themeIcon.innerHTML = theme === 'dark'
+            ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+            : '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    }
+
+    themeToggle.addEventListener('click', () => {
+        setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    setTheme(getTheme());
+
+    // ===== Date Helpers =====
+    function parseDate(dateStr) {
+        if (!dateStr) return null;
+        // Handle formats like "2026-07-02", "20260702", "2026/07/02"
+        const cleaned = String(dateStr).replace(/[\/\.]/g, '-');
+        if (/^\d{8}$/.test(cleaned)) {
+            return new Date(cleaned.slice(0,4) + '-' + cleaned.slice(4,6) + '-' + cleaned.slice(6,8));
+        }
+        return new Date(cleaned);
+    }
+
+    function formatDate(dateStr) {
+        const d = parseDate(dateStr);
+        if (!d || isNaN(d)) return dateStr || '未知';
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    function isToday(dateStr) {
+        const d = parseDate(dateStr);
+        if (!d) return false;
+        const now = new Date();
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    }
+
+    function isThisWeek(dateStr) {
+        const d = parseDate(dateStr);
+        if (!d) return false;
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        return d >= startOfWeek;
+    }
+
+    function isThisMonth(dateStr) {
+        const d = parseDate(dateStr);
+        if (!d) return false;
+        const now = new Date();
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
+
+    // ===== Extract fields from report object =====
+    function getReportTitle(r) {
+        return r.title || r['报告名称'] || r['标题'] || r.name || '';
+    }
+
+    function getReportBroker(r) {
+        return r.broker || r['券商'] || r['研究机构'] || r.orgName || r.org || '';
+    }
+
+    function getReportDate(r) {
+        return r.date || r['日期'] || r.publishDate || r['发布日期'] || r.reportDate || '';
+    }
+
+    function getReportIndustry(r) {
+        return r.industry || r['行业'] || r.industryName || r['行业名称'] || '';
+    }
+
+    function getReportRating(r) {
+        return r.rating || r['评级'] || r.ratingName || r['投资评级'] || '';
+    }
+
+    function getReportUrl(r) {
+        return r.url || r['链接'] || r.pdfUrl || r['PDF链接'] || r.href || '';
+    }
+
+    // ===== Data Loading =====
+    async function loadReports() {
+        try {
+            const resp = await fetch(DATA_URL);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            let data = await resp.json();
+
+            // Handle different data structures
+            if (Array.isArray(data)) {
+                allReports = data;
+            } else if (data && typeof data === 'object') {
+                // Try common keys
+                allReports = data.data || data.reports || data.list || data.items || [];
+                if (!Array.isArray(allReports)) {
+                    // Maybe it's a dict of dates
+                    const values = Object.values(data);
+                    for (const v of values) {
+                        if (Array.isArray(v)) {
+                            allReports = allReports.concat(v);
+                        }
+                    }
+                }
+            }
+
+            if (!Array.isArray(allReports)) allReports = [];
+
+            loadingState.style.display = 'none';
+            initStats();
+            initIndustryFilter();
+            applyFilters();
+        } catch (err) {
+            console.error('Failed to load reports:', err);
+            loadingState.innerHTML = `
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span class="loading-text">数据加载失败，请稍后刷新重试</span>
+                <span class="loading-text" style="font-size:0.8rem;opacity:0.6">${err.message}</span>
+            `;
+        }
+    }
+
+    // ===== Stats =====
+    function initStats() {
+        statTotal.textContent = allReports.length.toLocaleString();
+
+        const todayCount = allReports.filter(r => isToday(getReportDate(r))).length;
+        statToday.textContent = todayCount.toLocaleString();
+
+        const industries = new Set(allReports.map(r => getReportIndustry(r)).filter(Boolean));
+        statIndustry.textContent = industries.size;
+    }
+
+    // ===== Industry Filter =====
+    function initIndustryFilter() {
+        const industries = [...new Set(allReports.map(r => getReportIndustry(r)).filter(Boolean))].sort();
+        industries.forEach(ind => {
+            const opt = document.createElement('option');
+            opt.value = ind;
+            opt.textContent = ind;
+            industryFilter.appendChild(opt);
+        });
+    }
+
+    // ===== Filtering =====
+    function applyFilters() {
+        const { search, time, industry, rating } = currentFilters;
+        const searchLower = search.toLowerCase();
+
+        filteredReports = allReports.filter(r => {
+            const title = getReportTitle(r);
+            const broker = getReportBroker(r);
+            const date = getReportDate(r);
+            const ind = getReportIndustry(r);
+            const rat = getReportRating(r);
+
+            // Search
+            if (search && !title.toLowerCase().includes(searchLower) && !broker.toLowerCase().includes(searchLower)) {
+                return false;
+            }
+
+            // Time
+            if (time === 'today' && !isToday(date)) return false;
+            if (time === 'week' && !isThisWeek(date)) return false;
+            if (time === 'month' && !isThisMonth(date)) return false;
+
+            // Industry
+            if (industry && ind !== industry) return false;
+
+            // Rating
+            if (rating !== 'all') {
+                const validRatings = RATING_FILTER_MAP[rating] || [];
+                if (!validRatings.includes(rat)) return false;
+            }
+
+            return true;
+        });
+
+        // Sort by date descending
+        filteredReports.sort((a, b) => {
+            const da = parseDate(getReportDate(a));
+            const db = parseDate(getReportDate(b));
+            if (!da && !db) return 0;
+            if (!da) return 1;
+            if (!db) return -1;
+            return db - da;
+        });
+
+        currentPage = 1;
+        render();
+    }
+
+    // ===== Rendering =====
+    function render() {
+        const total = filteredReports.length;
+        const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * PER_PAGE;
+        const end = Math.min(start + PER_PAGE, total);
+        const pageItems = filteredReports.slice(start, end);
+
+        // Results info
+        resultsCount.textContent = '共 ' + total + ' 篇研报';
+        currentRange.textContent = total > 0 ? '第 ' + (start + 1) + ' - ' + end + ' 篇' : '';
+
+        // Empty state
+        if (total === 0) {
+            cardGrid.innerHTML = '';
+            emptyState.style.display = 'block';
+            pagination.innerHTML = '';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+
+        // Cards
+        cardGrid.innerHTML = pageItems.map((r, i) => {
+            const title = getReportTitle(r);
+            const broker = getReportBroker(r);
+            const date = getReportDate(r);
+            const ind = getReportIndustry(r);
+            const rat = getReportRating(r);
+            const url = getReportUrl(r);
+
+            const ratingClass = RATING_CLASS_MAP[rat] || '';
+            const ratingHtml = rat ? '<span class="rating-badge ' + ratingClass + '">' + escapeHtml(rat) + '</span>' : '';
+            const industryHtml = ind ? '<span class="industry-tag">' + escapeHtml(ind) + '</span>' : '';
+            const titleHtml = url
+                ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + escapeHtml(title) + '</a>'
+                : escapeHtml(title);
+
+            return '<article class="report-card" style="transition-delay:' + (i * 40) + 'ms">' +
+                '<div class="card-header">' +
+                    '<span class="card-date">' + escapeHtml(formatDate(date)) + '</span>' +
+                    ratingHtml +
+                '</div>' +
+                '<h3 class="card-title">' + titleHtml + '</h3>' +
+                '<div class="card-meta">' +
+                    (broker ? '<span class="meta-tag"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' + escapeHtml(broker) + '</span>' : '') +
+                    industryHtml +
+                '</div>' +
+            '</article>';
+        }).join('');
+
+        // Animate cards in
+        requestAnimationFrame(() => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.report-card').forEach(card => observer.observe(card));
+        });
+
+        // Pagination
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+
+        // Prev
+        html += '<button class="page-btn" data-page="' + (currentPage - 1) + '"' + (currentPage <= 1 ? ' disabled' : '') + '><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>';
+
+        // Page numbers
+        const pages = getPageNumbers(currentPage, totalPages);
+        pages.forEach(p => {
+            if (p === '...') {
+                html += '<span class="page-btn" style="border:none;cursor:default;">...</span>';
+            } else {
+                html += '<button class="page-btn' + (p === currentPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>';
+            }
+        });
+
+        // Next
+        html += '<button class="page-btn" data-page="' + (currentPage + 1) + '"' + (currentPage >= totalPages ? ' disabled' : '') + '><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>';
+
+        pagination.innerHTML = html;
+
+        pagination.querySelectorAll('button[data-page]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const p = parseInt(btn.getAttribute('data-page'));
+                if (p >= 1 && p <= totalPages) {
+                    currentPage = p;
+                    render();
+                    document.getElementById('main').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    }
+
+    function getPageNumbers(current, total) {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+        const pages = [];
+        pages.push(1);
+
+        if (current > 3) pages.push('...');
+
+        const start = Math.max(2, current - 1);
+        const end = Math.min(total - 1, current + 1);
+
+        for (let i = start; i <= end; i++) pages.push(i);
+
+        if (current < total - 2) pages.push('...');
+
+        pages.push(total);
+        return pages;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // ===== Event Listeners =====
+    let searchTimeout;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentFilters.search = searchInput.value.trim();
+            applyFilters();
+        }, 300);
+    });
+
+    // Time filter chips
+    document.querySelectorAll('.chip[data-time]').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.chip[data-time]').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentFilters.time = chip.getAttribute('data-time');
+            applyFilters();
+        });
+    });
+
+    // Industry filter
+    industryFilter.addEventListener('change', () => {
+        currentFilters.industry = industryFilter.value;
+        applyFilters();
+    });
+
+    // Rating filter chips
+    document.querySelectorAll('.rating-chip[data-rating]').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.rating-chip[data-rating]').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentFilters.rating = chip.getAttribute('data-rating');
+            applyFilters();
+        });
+    });
+
+    // ===== Init =====
+    loadReports();
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ report.title }} - 研报智库</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* === Reset & Base === */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #1a7a6d;
+            --primary-light: #229b8a;
+            --primary-dark: #125c52;
+            --accent: #e8713a;
+            --accent-light: #f09060;
+            --bg: #f0ebe4;
+            --bg-card: #e8e3dc;
+            --bg-dark: #1e2a2a;
+            --bg-dark-alt: #253333;
+            --text: #2d2d2d;
+            --text-light: #6b6b6b;
+            --text-on-dark: #e8e3dc;
+            --rating-买入: #22c55e;
+            --rating-增持: #3b82f6;
+            --rating-中性: #9ca3af;
+            --rating-减持: #f97316;
+            --rating-卖出: #ef4444;
+            --rating-无评级: #9ca3af;
+            --radius: 12px;
+            --shadow: 0 2px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* === Top Navigation === */
+        .nav {
+            background: var(--bg-dark);
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.15);
+        }
+
+        .nav-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-brand .cn {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        .nav-back {
+            color: var(--text-on-dark);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .nav-back:hover { opacity: 1; }
+        .nav-back svg { width: 18px; height: 18px; }
+
+        /* === Container === */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 3rem;
+        }
+
+        /* === Report Header === */
+        .report-header {
+            margin-bottom: 2rem;
+        }
+
+        .report-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 0.2rem 0.7rem;
+            border-radius: 20px;
+            letter-spacing: 0.03em;
+        }
+
+        .meta-tag.broker {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .meta-tag.industry {
+            background: var(--bg-card);
+            color: var(--primary-dark);
+            border: 1px solid var(--primary);
+        }
+
+        .meta-tag.date {
+            background: transparent;
+            color: var(--text-light);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .report-title {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 1.85rem;
+            font-weight: 900;
+            line-height: 1.35;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding: 0.35rem 1.1rem;
+            border-radius: 8px;
+            color: #fff;
+            background: var(--rating-{{ report.rating }});
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .rating-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+        }
+
+        /* === Key Points Panel === */
+        .key-points-panel {
+            background: var(--bg-dark);
+            color: var(--text-on-dark);
+            border-radius: var(--radius);
+            padding: 2rem 2.2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.5;
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .key-points-list {
+            list-style: none;
+        }
+
+        .key-points-list li {
+            position: relative;
+            padding: 0.6rem 0 0.6rem 1.8rem;
+            font-size: 0.95rem;
+            line-height: 1.65;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .key-points-list li:last-child { border-bottom: none; }
+
+        .key-points-list li::before {
+            content: '■';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-size: 0.7rem;
+            top: 0.75rem;
+        }
+
+        /* === Stat Cards === */
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.3rem 1.2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-light);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .stat-value.accent { color: var(--accent); }
+
+        .stat-card .stat-value.rating-color {
+            color: var(--rating-{{ report.rating }});
+        }
+
+        .stat-card .stat-sub {
+            font-size: 0.72rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* === Two Column Layout === */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Left: Dark Panel */
+        .dark-panel {
+            background: var(--bg-dark);
+            color: var(--text-on-dark);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .dark-panel .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dark-panel .section-title .icon {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .risk-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .risk-list li {
+            position: relative;
+            padding: 0.5rem 0 0.5rem 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .risk-list li:last-child { border-bottom: none; }
+
+        .risk-list li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #f97316;
+        }
+
+        .trend-text {
+            font-size: 0.9rem;
+            line-height: 1.75;
+            opacity: 0.85;
+            padding: 1rem;
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-light);
+        }
+
+        /* Right: Light Panel */
+        .light-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .light-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.8rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .light-card .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .light-card .section-title .icon { color: var(--accent); }
+
+        .stock-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .stock-list li {
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.35rem 0.9rem;
+            border-radius: 6px;
+        }
+
+        .stock-list li:empty { display: none; }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .data-item {
+            display: flex;
+            flex-direction: column;
+            padding: 0.7rem 0.9rem;
+            background: rgba(26,122,109,0.06);
+            border-radius: 8px;
+            border: 1px solid rgba(26,122,109,0.1);
+        }
+
+        .data-item .data-key {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-bottom: 0.15rem;
+            font-weight: 500;
+        }
+
+        .data-item .data-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        /* === Highlight Bar === */
+        .highlight-bar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            border-radius: var(--radius);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 20px rgba(26,122,109,0.3);
+        }
+
+        .highlight-bar .hl-icon {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+
+        .highlight-bar .hl-content {
+            flex: 1;
+        }
+
+        .highlight-bar .hl-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            opacity: 0.6;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .highlight-bar .hl-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        /* === Footer === */
+        .footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-light);
+            font-size: 0.78rem;
+            border-top: 1px solid rgba(0,0,0,0.06);
+            margin-top: 1rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .footer .footer-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 768px) {
+            .container { padding: 1.2rem 1rem 2rem; }
+            .report-title { font-size: 1.35rem; }
+            .stat-cards { grid-template-columns: repeat(2, 1fr); }
+            .two-col { grid-template-columns: 1fr; }
+            .key-points-panel { padding: 1.5rem; }
+            .dark-panel { padding: 1.5rem; }
+            .highlight-bar { padding: 1.2rem; }
+            .highlight-bar .hl-text { font-size: 0.95rem; }
+            .data-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .nav { padding: 0 1rem; }
+            .stat-cards { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+            .stat-card { padding: 1rem 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <a href="/" class="nav-brand">
+            <span class="cn">研报智库</span>
+            <span style="opacity:0.4;font-size:0.75rem;font-family:'JetBrains Mono',monospace;">ResearchHub</span>
+        </a>
+        <a href="javascript:history.back()" class="nav-back">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            返回列表
+        </a>
+    </nav>
+
+    <div class="container">
+
+        <!-- Report Header -->
+        <header class="report-header">
+            <div class="report-meta">
+                {% if report.org_name %}
+                <span class="meta-tag broker">{{ report.org_name }}</span>
+                {% endif %}
+                {% if report.industry_name %}
+                <span class="meta-tag industry">{{ report.industry_name }}</span>
+                {% endif %}
+                {% if report.publish_date %}
+                <span class="meta-tag date">{{ report.publish_date }}</span>
+                {% endif %}
+            </div>
+            <h1 class="report-title">{{ report.title }}</h1>
+            {% if report.rating and report.rating != '无评级' %}
+            <div class="rating-badge">
+                <span class="dot"></span>
+                {{ report.rating }}
+                {% if report.target_price %} &middot; 目标价 {{ report.target_price }}{% endif %}
+            </div>
+            {% endif %}
+        </header>
+
+        <!-- Key Points Panel -->
+        {% if report.key_points %}
+        <div class="key-points-panel">
+            <div class="section-label">Core Insights &middot; 核心观点</div>
+            <ul class="key-points-list">
+                {% for point in report.key_points %}
+                {% if point %}
+                <li>{{ point }}</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Stat Cards -->
+        <div class="stat-cards">
+            <div class="stat-card">
+                <div class="stat-label">评级 Rating</div>
+                <div class="stat-value rating-color">{{ report.rating or '无评级' }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">置信度 Confidence</div>
+                <div class="stat-value accent">{{ report.confidence or 0 }}%</div>
+                <div class="stat-sub">
+                    {% if report.confidence is defined %}
+                        {% if report.confidence >= 80 %}[高]{% elif report.confidence >= 50 %}[中]{% else %}[低]{% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">情绪 Sentiment</div>
+                <div class="stat-value">
+                    {% if report.sentiment == 'bullish' %}看多
+                    {% elif report.sentiment == 'bearish' %}看空
+                    {% else %}中性{% endif %}
+                </div>
+                <div class="stat-sub">
+                    {% if report.sentiment == 'bullish' %}BULLISH
+                    {% elif report.sentiment == 'bearish' %}BEARISH
+                    {% else %}NEUTRAL{% endif %}
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">行业 Industry</div>
+                <div class="stat-value" style="font-size:1rem;">{{ report.industry_name or '综合' }}</div>
+            </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="two-col">
+            <!-- Left: Dark Panel - Risks & Trend -->
+            <div class="dark-panel">
+                {% if report.risks %}
+                <div class="section-title">
+                    <span class="icon">&#9888;</span> 风险提示 Risks
+                </div>
+                <ul class="risk-list">
+                    {% for risk in report.risks %}
+                    {% if risk %}
+                    <li>{{ risk }}</li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if report.trend %}
+                <div class="section-title">
+                    <span class="icon">&#9650;</span> 趋势判断 Trend
+                </div>
+                <div class="trend-text">{{ report.trend }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Right: Light Panel - Stocks & Key Data -->
+            <div class="light-panel">
+                {% if report.stocks %}
+                <div class="light-card">
+                    <div class="section-title">
+                        <span class="icon">&#9733;</span> 涉及个股 Stocks
+                    </div>
+                    <ul class="stock-list">
+                        {% for stock in report.stocks %}
+                        {% if stock %}
+                        <li>{{ stock }}</li>
+                        {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if report.key_data %}
+                <div class="light-card">
+                    <div class="section-title">
+                        <span class="icon">&#9776;</span> 关键数据 Key Data
+                    </div>
+                    <div class="data-grid">
+                        {% for key, value in report.key_data.items() %}
+                        <div class="data-item">
+                            <span class="data-key">{{ key }}</span>
+                            <span class="data-val">{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Highlight Bar: One Liner -->
+        {% if report.one_liner %}
+        <div class="highlight-bar">
+            <div class="hl-icon">&#10070;</div>
+            <div class="hl-content">
+                <div class="hl-label">AI Summary &middot; 一句话摘要</div>
+                <div class="hl-text">{{ report.one_liner }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-brand">研报智库 ResearchHub</div>
+            <p>
+                来源：{{ report.org_name or '未知券商' }} &middot;
+                发布日期：{{ report.publish_date or '未知' }}
+                {% if report.pdf_url %}
+                 &middot; <a href="{{ report.pdf_url }}" target="_blank" rel="noopener">查看原文 PDF</a>
+                {% endif %}
+            </p>
+            <p style="margin-top:0.4rem;opacity:0.6;">AI 结构化分析仅供参考，不构成投资建议</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
